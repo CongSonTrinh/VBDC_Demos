@@ -6,5 +6,7 @@
 
 void systemInit(void);
 void taskHandleScreen(void);
+void taskUpdateRtcTime(void);
+void taskUpdateLed(void);
 
 #endif

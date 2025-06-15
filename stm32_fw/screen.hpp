@@ -12,7 +12,7 @@ public:
     Painter() 
       : col_(0), row_(0) { clear(); }
 
-    void clear() noexcept
+    void clear()
     {
       for (auto row = 0; row < Rows; ++row) {
         for (auto col = 0; col < Columns; ++col) {
@@ -21,10 +21,10 @@ public:
       }
     }
 
-    void setCursor(uint8_t col, uint8_t row) noexcept
+    void setCursor(uint8_t col, uint8_t row)
     {
-      row_ = row % Rows;
       col_ = col % Columns;
+      row_ = row % Rows;
     }
 
     virtual size_t write(uint8_t c) override
@@ -48,11 +48,11 @@ public:
   virtual ~LcdScreen() = default;
   virtual void onEnter(void) = 0;
   virtual LcdScreen<Columns, Rows>* update(void) = 0;
-  uint16_t cols() const noexcept { return Columns; }
-  uint16_t rows() const noexcept { return Rows; }
+  uint16_t cols() const { return Columns; }
+  uint16_t rows() const { return Rows; }
 
-  Painter& painter() noexcept { return painter_; }
-  const Painter& painter() const noexcept { return painter_; }
+  Painter& painter() { return painter_; }
+  const Painter& painter() const { return painter_; }
 
   // non-const + const overloads
   uint8_t (&buffer())[Rows][Columns] { return painter_.buf_; }

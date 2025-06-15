@@ -46,3 +46,8 @@ void ledUpdate(void)
     digitalWrite(configs[led]._pin, configs[led]._state);
   }
 }
+
+u8 ledState(u16 led)
+{
+  return configs[led]._state;
+}

@@ -2,6 +2,7 @@
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("Hello, World");
   systemInit();
 }
 
@@ -10,5 +11,8 @@ void loop() {
   while(millis() - timer_tick > TASK_INTERVALS);
   timer_tick = millis();
   buttonScan();
+  taskUpdateRtcTime();
+  taskUpdateLed();
+  taskUpdateTempAndHumid();
   taskHandleScreen();
 }

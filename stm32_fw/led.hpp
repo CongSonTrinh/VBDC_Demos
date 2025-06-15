@@ -8,5 +8,6 @@ void ledInit(void);
 void ledSet(u16, u8);
 void ledToggle(u16 led);
 void ledUpdate(void);
+u8 ledState(u16);
 
 #endif

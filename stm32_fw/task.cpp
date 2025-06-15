@@ -1,3 +1,4 @@
+#include "Arduino.h"
 #include "task.hpp"
 #include "led.hpp"
 #include "button.hpp"
@@ -5,23 +6,41 @@
 #include "Wire.h"
 #include "screen_app.hpp"
 #include "screen_engine.hpp"
-#include "Arduino.h"
 
-static LcdRenderer lcdDisp(LCD_ADDR, LCD_COLS, LCD_ROWS);
-static MenuItem rootItems[] =
+#define SIZE_OF_STATIC_ARRAY(arr) (sizeof(arr)/sizeof(arr[0]))
+
+ScreenEngine screenEngine;
+LcdRenderer lcdDisp(LCD_ADDR, LCD_COLS, LCD_ROWS);
+
+extern MenuItem settingItems[];
+extern MenuItem rootItems[];
+extern RootMenuScreen rootMenuScreen;
+extern LedControlScreen settingScreen;
+extern RtcTimeScreen rtcTimeScreen;
+
+MenuItem rootItems[] =
 {
-  {"1.Show Time", nullptr },
-  {"2.Sensors", nullptr },
-  {"3.Settings", nullptr },
-  {"4.Exit", nullptr },
+  { "RTC Time"  , &rtcTimeScreen },
+  { "Temp/Humid", nullptr        },
+  { "Led On/Off", &settingScreen },
+  { "Time Set"  , nullptr        },
 };
-static RootMenuScreen rootMenuScreen(rootItems, sizeof(rootItems)/sizeof(rootItems[0]), nullptr);
-static ScreenEngine screenEngine;
+MenuItem settingItems[] =
+{
+  { "Led 1:", nullptr },
+  { "Led 2:", nullptr },
+  { "Led 3:", nullptr },
+  { "Led 4:", nullptr },
+};
 
-void initLcd(void)
+RootMenuScreen rootMenuScreen(rootItems, SIZE_OF_STATIC_ARRAY(rootItems), nullptr);
+LedControlScreen settingScreen(settingItems, SIZE_OF_STATIC_ARRAY(settingItems), &rootMenuScreen);
+RtcTimeScreen rtcTimeScreen(&rootMenuScreen);
+
+void initLcd(TwoWire *i2c)
 {
   Wire.begin();
-  lcdDisp.begin(&Wire);
+  lcdDisp.begin(i2c);
   lcdDisp.display();
   lcdDisp.home();
   lcdDisp.backlight();
@@ -34,12 +53,26 @@ void systemInit(void)
   ledInit();
   // initUart();
   // initSensor();
-  // initRtc();
-  initLcd();
+  initRtc(&Wire);
+  initLcd(&Wire);
 }
 
 void taskHandleScreen(void)
 {
   auto screen = screenEngine.loop();
   lcdDisp.render(screen);
+}
+
+void taskUpdateRtcTime(void)
+{
+  static uint8_t time_ticks = 0;
+  time_ticks = (time_ticks + 1) % 10;
+  if (time_ticks == 0) {
+    rtcUpdate();
+  }
+}
+
+void taskUpdateLed(void)
+{
+  ledUpdate();
 }

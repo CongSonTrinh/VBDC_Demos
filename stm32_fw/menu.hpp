@@ -37,10 +37,9 @@ protected:
     currentCursor_++;
   }
 
-  void drawMenu()
+  void drawMenu(void)
   {
     uint8_t startItemIndex = totalItem_ > rows() ? (currentItem_ - currentCursor_) : 0;
-
     painter_.clear();
     for (uint8_t row = 0; row < rows(); ++row) {
       uint8_t itemIndex = startItemIndex + row;
@@ -50,15 +49,24 @@ protected:
       } else {
         painter_.print(' ');
       }
-      painter_.print(items_[itemIndex].label);       
+      painter_.print(itemIndex + 1, DEC);
+      painter_.print('.');
+      painter_.print(items_[itemIndex].label);
     }
   }
 
-private:
+protected:
   const Item    *items_;
   uint8_t        totalItem_;
   uint8_t        currentItem_;
   uint8_t        currentCursor_;
+
+  inline Lcd1602Screen* nextScreen() { return items_[currentItem_].next; }
+  inline Lcd1602Screen* parent() { return parent_; }
+  inline void setCursor(uint8_t pos) { currentCursor_ = pos % rows(); }
+  inline void setItemIndex(uint8_t index) { currentItem_ = index % totalItem_; }
+
+private:
   Lcd1602Screen *parent_;
 };
 

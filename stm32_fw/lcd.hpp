@@ -1,4 +1,3 @@
-#include <stdint.h>
 #ifndef LCD_HPP
 #define LCD_HPP
 
