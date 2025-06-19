@@ -7,6 +7,7 @@
 #include "screen_app.hpp"
 #include "screen_engine.hpp"
 #include "aht10.hpp"
+#include "uart.hpp"
 
 #define SIZE_OF_STATIC_ARRAY(arr) (sizeof(arr)/sizeof(arr[0]))
 
@@ -54,7 +55,7 @@ void systemInit(void)
 {
   buttonInit();
   ledInit();
-  // initUart();
+  initUart();
   initAHT10(&Wire);
   initRtc(&Wire);
   initLcd(&Wire);
@@ -83,4 +84,9 @@ void taskUpdateLed(void)
 void taskUpdateTempAndHumid(void)
 {
   updateAHT10();
+}
+
+void taskProcessMessage(void)
+{
+  processMessage();
 }

@@ -14,5 +14,6 @@ void loop() {
   taskUpdateTempAndHumid();
   taskUpdateRtcTime();
   taskUpdateLed();
+  taskProcessMessage();
   taskHandleScreen();
 }

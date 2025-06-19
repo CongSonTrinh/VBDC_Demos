@@ -1,102 +1,109 @@
-#include "secrets.h"
-#include <WiFiClientSecure.h>
-#include <PubSubClient.h>
-#include <ArduinoJson.h>
-#include "WiFi.h"
+#define ERA_LOCATION_VN
+#define ERA_AUTH_TOKEN "4fc2a19d-e8bd-4720-97d3-d9702533a017"
 
-#define DHTPIN 14      // Digital pin connected to the DHT sensor
-#define DHTTYPE DHT11  // DHT 11
+#include <Arduino.h>
+#include <ERa.hpp>
+#include <Automation/ERaSmart.hpp>
+#include <Time/ERaEspTime.hpp>
 
-#define AWS_IOT_PUBLISH_TOPIC "esp32/pub"
-#define AWS_IOT_SUBSCRIBE_TOPIC "esp32/sub"
+HardwareSerial CSerial(0);
 
-float h;
-float t;
+#include "cmd.h"
 
-WiFiClientSecure net = WiFiClientSecure();
-PubSubClient client(net);
+const char ssid[] = "Son";
+const char pass[] = "23456789";
 
-void connectAWS() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+ERaEspTime syncTime;
+ERaSmart smart(ERa, syncTime);
 
-  Serial.println("Connecting to Wi-Fi");
+#define P_VALUE(i)  \
+  do { \
+    int value = param.getInt(); \
+    Serial.print("Value " #i " = "); \
+    Serial.println(value); \
+  } while(0)
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
 
-  // Configure WiFiClientSecure to use the AWS IoT device credentials
-  net.setCACert(AWS_CERT_CA);
-  net.setCertificate(AWS_CERT_CRT);
-  net.setPrivateKey(AWS_CERT_PRIVATE);
-
-  // Connect to the MQTT broker on the AWS endpoint we defined earlier
-  client.setServer(AWS_IOT_ENDPOINT, 8883);
-
-  // Create a message handler
-  client.setCallback(messageHandler);
-
-  Serial.println("Connecting to AWS IOT");
-
-  while (!client.connect(THINGNAME)) {
-    Serial.print(".");
-    delay(100);
-  }
-
-  if (!client.connected()) {
-    Serial.println("AWS IoT Timeout!");
-    return;
-  }
-
-  // Subscribe to a topic
-  client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
-
-  Serial.println("AWS IoT Connected!");
+void setLedCmd(uint8_t led, uint8_t isOn)
+{
+  CSerial.write(SET_LEDS_CMD);
+  CSerial.write(led);
+  CSerial.write(isOn);
 }
 
-void publishMessage() {
-  StaticJsonDocument<200> doc;
-  doc["humidity"] = h;
-  doc["temperature"] = t;
-  char jsonBuffer[512];
-  serializeJson(doc, jsonBuffer);  // print to client
-
-  client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
+ERA_WRITE(V1) {
+  // P_VALUE(1);
+  uint8_t isOn = param.getInt();
+  setLedCmd(0, isOn);
 }
 
-void messageHandler(char* topic, byte* payload, unsigned int length) {
-  Serial.print("incoming: ");
-  Serial.println(topic);
+ERA_WRITE(V2) {
+  // P_VALUE(2);
+  uint8_t isOn = param.getInt();
+  setLedCmd(1, isOn);
+}
 
-  StaticJsonDocument<200> doc;
-  deserializeJson(doc, payload);
-  const char* message = doc["message"];
-  Serial.println(message);
+ERA_WRITE(V3) {
+  // P_VALUE(3);
+  uint8_t isOn = param.getInt();
+  setLedCmd(2, isOn);
+}
+
+ERA_WRITE(V4) {
+  // P_VALUE(4);
+  uint8_t isOn = param.getInt();
+  setLedCmd(3, isOn);
+}
+
+// ERA_WRITE(V1) {
+
+// }
+
+ERA_CONNECTED() {
+  Serial.println("ERA Connected!");
+}
+
+ERA_DISCONNECTED() {
+  Serial.println("ERA Disconnected!");
+}
+
+void timerEvent() {
+  // Serial.print("Send get data command, response: ");
+
+  CSerial.write(GET_DATA_CMD);
+  String input = CSerial.readStringUntil('\n');
+
+  int pos1 = input.indexOf(',');
+  int pos2 = input.indexOf(',', pos1 + 1);
+  int pos3 = input.indexOf(',', pos2 + 1);
+
+  String time   = input.substring(0, pos1);
+  String led    = input.substring(pos1 + 1, pos2);
+  String temp   = input.substring(pos2 + 1, pos3);
+  String humid  = input.substring(pos3 + 1);
+
+  // Serial.println(time);   // "12345"
+  // Serial.println(led);    // "ON"
+  // Serial.println(temp);   // "25"
+  // Serial.println(humid);  // "80"
+
+  ERa.virtualWrite(V0, time.c_str());
+  ERa.virtualWrite(V1, !(led[0] == '1'));
+  ERa.virtualWrite(V2, !(led[1] == '1'));
+  ERa.virtualWrite(V3, !(led[2] == '1'));
+  ERa.virtualWrite(V4, !(led[3] == '1'));
+  ERa.virtualWrite(V5, temp.toFloat());
+  ERa.virtualWrite(V6, humid.toFloat());
 }
 
 void setup() {
   Serial.begin(115200);
-  connectAWS();
+  CSerial.begin(115200, SERIAL_8N1, -1, -1);
+  ERa.setScanWiFi(true);
+  ERa.begin(ssid, pass);
+  ERa.addInterval(1000L, timerEvent);
 }
 
 void loop() {
-  h = 45.0;
-  t = 25.5;
-  if (isnan(h) || isnan(t))  // Check if any reads failed and exit early (to try again).
-  {
-    Serial.println(F("Failed to read from DHT sensor!"));
-    return;
-  }
-
-  Serial.print(F("Humidity: "));
-  Serial.print(h);
-  Serial.print(F("%  Temperature: "));
-  Serial.print(t);
-  Serial.println(F("°C "));
-
-  publishMessage();
-  client.loop();
-  delay(1000);
+  ERa.run();
 }
