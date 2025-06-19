@@ -6,6 +6,7 @@
 #include "Wire.h"
 #include "screen_app.hpp"
 #include "screen_engine.hpp"
+#include "aht10.hpp"
 
 #define SIZE_OF_STATIC_ARRAY(arr) (sizeof(arr)/sizeof(arr[0]))
 
@@ -17,13 +18,14 @@ extern MenuItem rootItems[];
 extern RootMenuScreen rootMenuScreen;
 extern LedControlScreen settingScreen;
 extern RtcTimeScreen rtcTimeScreen;
+extern SensorAht10Screen sensorAht10Screen;
 
 MenuItem rootItems[] =
 {
-  { "RTC Time"  , &rtcTimeScreen },
-  { "Temp/Humid", nullptr        },
-  { "Led On/Off", &settingScreen },
-  { "Time Set"  , nullptr        },
+  { "RTC Time"  , &rtcTimeScreen     },
+  { "Temp/Humid", &sensorAht10Screen },
+  { "Led On/Off", &settingScreen     },
+  { "Time Set"  , nullptr            },
 };
 MenuItem settingItems[] =
 {
@@ -36,6 +38,7 @@ MenuItem settingItems[] =
 RootMenuScreen rootMenuScreen(rootItems, SIZE_OF_STATIC_ARRAY(rootItems), nullptr);
 LedControlScreen settingScreen(settingItems, SIZE_OF_STATIC_ARRAY(settingItems), &rootMenuScreen);
 RtcTimeScreen rtcTimeScreen(&rootMenuScreen);
+SensorAht10Screen sensorAht10Screen(&rootMenuScreen);
 
 void initLcd(TwoWire *i2c)
 {
@@ -52,7 +55,7 @@ void systemInit(void)
   buttonInit();
   ledInit();
   // initUart();
-  // initSensor();
+  initAHT10(&Wire);
   initRtc(&Wire);
   initLcd(&Wire);
 }
@@ -75,4 +78,9 @@ void taskUpdateRtcTime(void)
 void taskUpdateLed(void)
 {
   ledUpdate();
+}
+
+void taskUpdateTempAndHumid(void)
+{
+  updateAHT10();
 }

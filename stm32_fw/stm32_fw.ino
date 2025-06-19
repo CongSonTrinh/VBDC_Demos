@@ -11,8 +11,8 @@ void loop() {
   while(millis() - timer_tick > TASK_INTERVALS);
   timer_tick = millis();
   buttonScan();
+  taskUpdateTempAndHumid();
   taskUpdateRtcTime();
   taskUpdateLed();
-  taskUpdateTempAndHumid();
   taskHandleScreen();
 }

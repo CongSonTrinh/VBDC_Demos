@@ -5,6 +5,7 @@
 #include "button.hpp"
 #include "led.hpp"
 #include "rtc.hpp"
+#include "aht10.hpp"
 
 class RootMenuScreen : public MenuScreen {
 public:
@@ -102,6 +103,52 @@ private:
     painter_.print(dateLine);
     painter_.setCursor(0, 1);
     painter_.print(hourLine);
+  }
+
+  Lcd1602Screen *parent_;
+};
+
+class SensorAht10Screen : public Lcd1602Screen {
+public:
+  SensorAht10Screen(Lcd1602Screen *parent)
+  : parent_(parent)
+  {
+  }
+
+  void onEnter(void) {
+    printSensor();
+  }
+
+  Lcd1602Screen* update(void) {
+    static uint8_t timer_ticks = 0;
+    if (timer_ticks == 0) {
+      printSensor();
+    }
+    timer_ticks = (timer_ticks + 1) % 20;
+
+    if (buttonIsPressed(BUTTON_MODE)) {
+      return parent_;
+    }
+
+    return this;
+  }
+
+private:
+  // Example format
+  // 0123456789012345
+  // T: xx.xx deg C
+  // H: xx.xx %rH
+  void printSensor() {
+    String tLine, hLine;
+
+    tLine = "T: " + String(tempAHT10(), 2) + " deg C";
+    hLine = "H: " + String(humidityAHT10(), 2) + " %rH";
+
+    painter_.clear();
+    painter_.setCursor(0, 0);
+    painter_.print(tLine);
+    painter_.setCursor(0, 1);
+    painter_.print(hLine);
   }
 
   Lcd1602Screen *parent_;

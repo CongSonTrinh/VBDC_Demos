@@ -8,5 +8,6 @@ void systemInit(void);
 void taskHandleScreen(void);
 void taskUpdateRtcTime(void);
 void taskUpdateLed(void);
+void taskUpdateTempAndHumid(void);
 
 #endif
