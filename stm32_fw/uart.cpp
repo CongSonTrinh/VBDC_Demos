@@ -26,10 +26,10 @@ String rtc2String()
 String ledState2String()
 {
   String s;
-  s += ledState(0);
-  s += ledState(1);
-  s += ledState(2);
-  s += ledState(3);
+  s += (ledState(0) == LED_ON);
+  s += (ledState(1) == LED_ON);
+  s += (ledState(2) == LED_ON);
+  s += (ledState(3) == LED_ON);
 
   return s;
 }
@@ -48,7 +48,7 @@ String humid2String()
 
 void initUart(void)
 {
-  CSerial.begin(115200);
+  CSerial.begin(230400);
 }
 
 void processMessage(void)
@@ -73,12 +73,9 @@ void processMessage(void)
     while(!CSerial.available());
     uint8_t led = CSerial.read();
     while(!CSerial.available());
-    uint8_t isOff = CSerial.read();
+    uint8_t isOn = CSerial.read();
     if (led < 4) {
-      Serial.print("Set led ");
-      Serial.print(led);
-      Serial.println(isOff);
-      ledSet(led, isOff ? LED_OFF : LED_ON);
+      ledSet(led, isOn ? LED_ON : LED_OFF);
     }
   }
 }

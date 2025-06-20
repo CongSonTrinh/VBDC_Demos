@@ -8,5 +8,4 @@
 void initUart(void);
 void processMessage(void);
 
-
 #endif

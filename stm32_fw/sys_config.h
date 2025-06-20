@@ -20,7 +20,7 @@
 #define BUTTON_DOWN_PIN (PB7)
 
 #define LED_ON          (LOW)
-#define LED_OFF         (!LED_ON)
+#define LED_OFF         (HIGH)
 
 #define LED_1_PIN       (PC0)
 #define LED_2_PIN       (PC1)
