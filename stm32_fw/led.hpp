@@ -3,7 +3,6 @@
 
 #include "sys_config.h"
 
-
 void ledInit(void);
 void ledSet(u16, u8);
 void ledToggle(u16 led);

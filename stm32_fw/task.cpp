@@ -20,13 +20,14 @@ extern RootMenuScreen rootMenuScreen;
 extern LedControlScreen settingScreen;
 extern RtcTimeScreen rtcTimeScreen;
 extern SensorAht10Screen sensorAht10Screen;
+extern RtcSettingScreen rtcSettingScreen;
 
 MenuItem rootItems[] =
 {
   { "RTC Time"  , &rtcTimeScreen     },
   { "Temp/Humid", &sensorAht10Screen },
   { "Led On/Off", &settingScreen     },
-  { "Time Set"  , nullptr            },
+  { "Time Set"  , &rtcSettingScreen  },
 };
 MenuItem settingItems[] =
 {
@@ -40,6 +41,7 @@ RootMenuScreen rootMenuScreen(rootItems, SIZE_OF_STATIC_ARRAY(rootItems), nullpt
 LedControlScreen settingScreen(settingItems, SIZE_OF_STATIC_ARRAY(settingItems), &rootMenuScreen);
 RtcTimeScreen rtcTimeScreen(&rootMenuScreen);
 SensorAht10Screen sensorAht10Screen(&rootMenuScreen);
+RtcSettingScreen rtcSettingScreen(&rootMenuScreen);
 
 void initLcd(TwoWire *i2c)
 {

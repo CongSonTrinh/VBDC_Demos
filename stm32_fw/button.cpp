@@ -43,6 +43,15 @@ bool buttonIsPressed(u16 button, u32 start_cmp)
   }
 }
 
+bool buttonIsPressed_1(u16 button)
+{
+  if ((configs[button]._cnt == 1) || ((configs[button]._cnt > 20) && (configs[button]._cnt % 4 == 0))) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 bool buttonIsHold(u16 button, u32 start_cmp)
 {
   if (configs[button]._cnt > start_cmp) {

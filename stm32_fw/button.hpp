@@ -7,5 +7,6 @@ void buttonInit(void);
 void buttonScan(void);
 bool buttonIsPressed(u16 button, u32 start_cmp = 4);
 bool buttonIsHold(u16 button, u32 start_cmp = 2);
+bool buttonIsPressed_1(u16 button);
 
 #endif

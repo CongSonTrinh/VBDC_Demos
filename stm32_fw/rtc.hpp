@@ -25,5 +25,6 @@ String dayOfWeekString(uint8_t);
 String monthOfYearString(uint8_t);
 inline bool isLeafYear(uint32_t);
 int endOfMonth(uint8_t, uint8_t);
+void setRTC(const RtcData&);
 
 #endif

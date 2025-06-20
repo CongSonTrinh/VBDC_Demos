@@ -9,6 +9,17 @@ void initRtc(TwoWire *i2c)
   rtcUpdate();
 }
 
+void setRTC(const RtcData& data)
+{
+  rtc.setYear(data.year);
+  rtc.setMonth(data.month);
+  rtc.setDate(data.date);
+  rtc.setDoW(data.dayOfWeek);
+  rtc.setHour(data.hour);
+  rtc.setMinute(data.minute);
+  rtc.setSecond(0);
+}
+
 void rtcUpdate(void)
 {
   rtcData.dayOfWeek   = rtc.getDoW();
